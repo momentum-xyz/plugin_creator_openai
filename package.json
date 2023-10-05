@@ -1,0 +1,82 @@
+{
+  "name": "plugin_odyssey_creator_openai",
+  "description": "Creator plugin for Odyssey - using OpenAI",
+  "version": "0.1.0",
+  "repository": "https://github.com/momentum-xyz/ui-client",
+  "license": "GPL-3.0",
+  "homepage": "https://odyssey.org",
+  "author": "info@odyssey.org",
+  "scopes": {
+    "ui": [
+      "creatorTab"
+    ]
+  },
+  "attribute_types": [
+    {
+      "name": "state",
+      "description": "Plugin shared state",
+      "sync": "object"
+    },
+    {
+      "name": "config",
+      "description": "Plugin configuration"
+    }
+  ],
+  "private": true,
+  "resolutions": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "dependencies": {
+    "@momentum-xyz/core": "^0.1.2",
+    "@momentum-xyz/sdk": "^0.1.5",
+    "@momentum-xyz/ui-kit": "^0.1.4",
+    "openai": "^4.11.1",
+    "polished": "^4.2.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^5.2.0",
+    "react-scripts": "5.0.1",
+    "styled-components": "^5.3.6",
+    "web-vitals": "^2.1.4"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^5.14.1",
+    "@testing-library/react": "^13.0.0",
+    "@testing-library/user-event": "^13.2.1",
+    "@types/jest": "^24.0.0",
+    "@types/node": "^12.20.6",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@types/react-router-dom": "^5.1.7",
+    "@types/styled-components": "^5.1.28",
+    "@types/webpack-env": "^1.18.1",
+    "autoprefixer": "^9",
+    "compression-webpack-plugin": "^10.0.0",
+    "eslint": "^8.15.0",
+    "eslint-plugin-import": "^2.26.0",
+    "jest": "26.6.0",
+    "prettier": "^2.3.0",
+    "sass": "^1.49.9",
+    "source-map-explorer": "^2.5.2",
+    "typescript": "4.9.5"
+  },
+  "scripts": {
+    "start": "momentum-plugin start",
+    "start:plugin": "momentum-plugin start:plugin",
+    "build": "momentum-plugin build",
+    "test": "momentum-plugin test"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
