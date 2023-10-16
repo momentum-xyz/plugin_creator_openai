@@ -133,25 +133,35 @@ const usePlugin: UsePluginHookType = (props) => {
   }, [storedOpenAIApiKey, setStoredOpenAIApiKey]);
 
   const handleSend = async (message: string) => {
+    console.log('handleSend', message);
     setMessages((messages) => [
       ...messages,
       { content: message, role: 'user' },
     ]);
-    console.log('onSend', message);
-    const response = await sendToOpenAI(
-      message,
-      objects,
-      objectsData,
-      myTransform,
-      supportedAssets
-    );
 
-    const result = await processResponse(response, worldApi);
+    try {
+      const response = await sendToOpenAI(
+        message,
+        objects,
+        objectsData,
+        myTransform,
+        supportedAssets
+      );
 
-    setMessages((messages) => [
-      ...messages,
-      { content: result, role: 'assistant' },
-    ]);
+      console.log('processResponse from OpenAI:', response);
+      const result = await processResponse(response, worldApi);
+
+      setMessages((messages) => [
+        ...messages,
+        { content: result, role: 'assistant' },
+      ]);
+    } catch (err: any) {
+      console.error('Something went wrong', err);
+      setMessages((messages) => [
+        ...messages,
+        { content: 'Something went wrong. ' + err.message, role: 'assistant' },
+      ]);
+    }
   };
 
   let content = (
@@ -207,12 +217,7 @@ const processResponse = async (
   response: string,
   worldApi: UseWorldReturnInterface
 ) => {
-  let actions: any[] = [];
-  try {
-    actions = JSON.parse(response);
-  } catch (err) {
-    console.error('Failed to parse response', err);
-  }
+  let actions: any[] = JSON.parse(response);
 
   const {
     spawnObject,
