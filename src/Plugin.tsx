@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import {
   Asset3d,
+  ObjectData,
+  ObjectDefinition,
+  TransformNoScale,
   UsePluginHookType,
+  UseWorldReturnInterface,
   useSharedObjectState,
   useWorld,
 } from '@momentum-xyz/sdk';
@@ -16,26 +20,65 @@ import { Message } from './types';
 import { initClient, sendToOpenAI } from './open-ai';
 import { Button } from '@momentum-xyz/ui-kit';
 
+let worldId: string;
+const objects: Record<string, ObjectDefinition> = {};
+const objectsData: Record<string, ObjectData> = {};
+let myTransform: TransformNoScale = {
+  position: { x: 0, y: 0, z: 0 },
+  rotation: { x: 0, y: 0, z: 0 },
+};
+
+const asset3dNamesById: Record<string, string> = {};
+let supportedAssets: { asset3dId: string; name: string; category: string }[] =
+  [];
+
+const defaultTransform = {
+  position: { x: 0, y: 0, z: 0 },
+  rotation: { x: 0, y: 0, z: 0 },
+  scale: { x: 1, y: 1, z: 1 },
+};
+
 const usePlugin: UsePluginHookType = (props) => {
   console.log('[plugin_creator]: usePlugin', props);
   const [messages, setMessages] = useState<Message[]>([]);
 
-  const [assets3d, setAssets3d] = useState<Asset3d[]>([]);
-
-  const { transformObject, getSupportedAssets3d } = useWorld({
+  const worldApi = useWorld({
     onJoinedWorld: (worldInfo) => {
       console.log('[plugin_creator]: onJoinedWorld', worldInfo);
+      worldId = worldInfo.id;
     },
     onLeftWorld: () => {
       console.log('[plugin_creator]: onLeftWorld');
+      worldId = '';
+    },
+    onMyPosition(transform) {
+      console.log('[plugin_creator]: onMyPosition', transform);
+      myTransform = transform;
     },
     onObjectAdded: (object) => {
       console.log('[plugin_creator]: onObjectAdded', object);
+      if (object.id !== worldId) {
+        objects[object.id] = object;
+      }
     },
-    onObjectRemoved: (object) => {
-      console.log('[plugin_creator]: onObjectRemoved', object);
+    onObjectRemoved: (objectId) => {
+      console.log('[plugin_creator]: onObjectRemoved', objectId);
+      delete objects[objectId];
+    },
+    onObjectMove(objectId, transform) {
+      console.log('[plugin_creator]: onObjectMove', objectId, transform);
+      objects[objectId] = {
+        ...objects[objectId],
+        transform,
+      };
+    },
+    onObjectData(objectId, data) {
+      console.log('[plugin_creator]: onObjectData', objectId, data);
+      objectsData[objectId] = data;
     },
   });
+
+  const { getSupportedAssets3d } = worldApi;
 
   useEffect(() => {
     Promise.all([
@@ -45,29 +88,19 @@ const usePlugin: UsePluginHookType = (props) => {
       console.log('[plugin_creator]: assets3d resp', res);
       const assets3d = res.flat();
       console.log('[plugin_creator]: assets3d', assets3d);
-      setAssets3d(assets3d);
-    });
 
-    // setTimeout(() => {
-    //   transformObject('test', {
-    //     position: {
-    //       x: 0,
-    //       y: 0,
-    //       z: 0,
-    //     },
-    //     rotation: {
-    //       x: 0,
-    //       y: 0,
-    //       z: 0,
-    //     },
-    //     scale: {
-    //       x: 1,
-    //       y: 1,
-    //       z: 1,
-    //     },
-    //   });
-    // }, 3000);
-  }, [transformObject]);
+      supportedAssets = assets3d.map(({ id, meta: { name, category } }) => ({
+        asset3dId: id,
+        name,
+        category,
+      }));
+      console.log('Supported assets', supportedAssets);
+
+      for (const asset of supportedAssets) {
+        asset3dNamesById[asset.asset3dId] = asset.name;
+      }
+    });
+  }, [getSupportedAssets3d]);
 
   /*
   const {
@@ -105,11 +138,19 @@ const usePlugin: UsePluginHookType = (props) => {
       { content: message, role: 'user' },
     ]);
     console.log('onSend', message);
-    // const response = 'hey hoe';
-    const response = await sendToOpenAI(message, {}, {}, {}, []);
+    const response = await sendToOpenAI(
+      message,
+      objects,
+      objectsData,
+      myTransform,
+      supportedAssets
+    );
+
+    const result = await processResponse(response, worldApi);
+
     setMessages((messages) => [
       ...messages,
-      { content: response, role: 'assistant' },
+      { content: result, role: 'assistant' },
     ]);
   };
 
@@ -160,6 +201,88 @@ const usePlugin: UsePluginHookType = (props) => {
       },
     },
   };
+};
+
+const processResponse = async (
+  response: string,
+  worldApi: UseWorldReturnInterface
+) => {
+  let actions: any[] = [];
+  try {
+    actions = JSON.parse(response);
+  } catch (err) {
+    console.error('Failed to parse response', err);
+  }
+
+  const {
+    spawnObject,
+    transformObject,
+    removeObject,
+    requestObjectLock,
+    requestObjectUnlock,
+    setObjectColor,
+    setObjectName,
+  } = worldApi;
+
+  const responses: string[] = [];
+
+  for (const action of actions) {
+    switch (action.type) {
+      case 'text':
+        console.log('Text response', action);
+        responses.push(action.text);
+        break;
+
+      case 'new':
+        console.log('New object', action);
+        const { name, color, asset3dId, transform } = action;
+
+        if (!asset3dNamesById[asset3dId]) {
+          console.error('Unknown asset3dId', asset3dId);
+          break;
+        }
+        const object = await spawnObject({
+          name,
+          transform: { ...defaultTransform, ...transform },
+          asset_3d_id: asset3dId,
+        });
+        console.log('Spawned object', object);
+        if (color) {
+          await setObjectColor(object.id, color);
+        }
+        break;
+
+      case 'edit':
+        console.log('Edit object', action);
+        if (action.color) {
+          await setObjectColor(action.objectId, action.color);
+        }
+        if (action.name) {
+          await setObjectName(action.objectId, action.name);
+        }
+        break;
+
+      case 'remove':
+        console.log('Remove object', action);
+        removeObject(action.objectId);
+        break;
+
+      case 'transform':
+        console.log('Transform object', action);
+        await requestObjectLock(action.objectId);
+        const newTransform = {
+          ...objects[action.objectId].transform,
+          ...action.transform,
+        };
+        transformObject(action.objectId, newTransform);
+        requestObjectUnlock(action.objectId);
+        break;
+
+      default:
+        console.log('Unknown action', action);
+    }
+  }
+  return responses.join('\n') || 'Done';
 };
 
 const Plugin = {
