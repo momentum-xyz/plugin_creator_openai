@@ -49,7 +49,8 @@ export const sendToOpenAI = async (
         content:
           idx === history.length - 1
             ? content
-            : content + '\nReturn only valid JSON, no description!',
+            : content +
+              '\nReturn only valid JSON, no description, comments or explanations!',
       })),
     ];
   console.log('Send to OpenAI', messages);
