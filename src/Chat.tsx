@@ -118,7 +118,10 @@ export const ChatInput = ({ onSend }: ChatInputProps) => {
       <Input
         wide
         value={message}
-        // disabled={isLoading} leads to losing focus after sending a message
+        disabled={isLoading}
+        //disabled leads to losing focus after sending a message, workaround is using key
+        key={'input' + isLoading}
+        autoFocus
         onChange={(value) => setMessage(value)}
         placeholder="Type your message"
         onEnter={handleSubmit}
