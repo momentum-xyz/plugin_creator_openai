@@ -1,6 +1,6 @@
 {
-  "name": "plugin_odyssey_creator_openai",
-  "displayName": "Odyssey Creator OpenAI",
+  "name": "plugin_odyssey_creator_ai",
+  "displayName": "Odyssey Creator AI",
   "description": "Creator plugin for Odyssey - using OpenAI",
   "version": "0.1.0",
   "repository": "https://github.com/momentum-xyz/ui-client",
