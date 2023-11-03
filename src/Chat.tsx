@@ -10,7 +10,7 @@ import React, { FC, useEffect, useRef, useState } from 'react';
 // } from '@mui/material';
 // import SendIcon from '@mui/icons-material/Send';
 import { Message } from './types';
-import { IconButton, Input } from '@momentum-xyz/ui-kit';
+import { IconButton, Input, Loader } from '@momentum-xyz/ui-kit';
 import * as styled from './Chat.styled';
 
 interface ChatHistoryProps {
@@ -114,7 +114,12 @@ export const ChatInput = ({ onSend }: ChatInputProps) => {
     }
   };
   return (
-    <div className="chat-input-panel">
+    <styled.ChatInputContainer>
+      {isLoading && (
+        <styled.ChatLoaderHolder>
+          <Loader />
+        </styled.ChatLoaderHolder>
+      )}
       <Input
         wide
         value={message}
@@ -128,6 +133,6 @@ export const ChatInput = ({ onSend }: ChatInputProps) => {
         actionRight={<IconButton isWhite name="send" onClick={handleSubmit} />}
       />
       {/* {isLoading && <LinearProgress sx={{ margin: '1em 0' }} />} */}
-    </div>
+    </styled.ChatInputContainer>
   );
 };

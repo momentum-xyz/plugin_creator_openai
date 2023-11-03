@@ -21,3 +21,14 @@ export const Message = styled.div`
   margin: 10px;
   max-width: 50%;
 `;
+
+export const ChatInputContainer = styled.div`
+  position: relative;
+`;
+
+export const ChatLoaderHolder = styled.div`
+  position: absolute;
+  top: -1.5em;
+  left: 0;
+  right: 0;
+`;
