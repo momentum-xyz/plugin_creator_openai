@@ -19,6 +19,7 @@ import * as styled from './Chat.styled';
 import { Message } from './types';
 import { initClient, sendToOpenAI } from './open-ai';
 import { Button } from '@momentum-xyz/ui-kit';
+import { meshyGenerate3D } from './meshy-ai';
 
 let worldId: string;
 const objects: Record<string, ObjectDefinition> = {};
@@ -132,6 +133,11 @@ const usePlugin: UsePluginHookType = (props) => {
     }
   }, [storedOpenAIApiKey, setStoredOpenAIApiKey]);
 
+  const [storedMeshyApiKey, setStoredMeshyApiKey] = useLocalStorage(
+    '__plugin_d7bda9fc-c632-4650-8e0c-583c83e5c515_temp_data_msh__',
+    null
+  );
+
   const handleSend = async (message: string) => {
     console.log('handleSend', message);
     setMessages((messages) => [
@@ -140,6 +146,46 @@ const usePlugin: UsePluginHookType = (props) => {
     ]);
 
     try {
+      if (message.slice(0, 10).toLowerCase().startsWith('/meshy:')) {
+        let meshyApiKey = storedMeshyApiKey;
+        if (!storedMeshyApiKey) {
+          const key = prompt('Please enter your Meshy API key');
+          if (key) {
+            setStoredMeshyApiKey(key);
+          }
+          meshyApiKey = key;
+        }
+
+        if (!meshyApiKey) {
+          throw new Error('No Meshy API key provided');
+        }
+
+        const { downloadUrl, thumbnailUrl } = await meshyGenerate3D(
+          {
+            object_prompt: message.slice(7),
+            art_style: 'realistic',
+          },
+          meshyApiKey,
+          (progress) => {
+            console.log('Meshy progress', progress);
+          }
+        );
+
+        setMessages((messages) => [
+          ...messages,
+          {
+            content: JSON.stringify({
+              downloadUrl,
+              thumbnailUrl,
+            }),
+            role: 'model_preview',
+          },
+        ]);
+
+        return;
+      }
+
+      // OpenAI
       const response = await sendToOpenAI(
         message,
         objects,

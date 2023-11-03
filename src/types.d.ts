@@ -1,6 +1,6 @@
 export interface Message {
   content: string;
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'model_preview';
 }
 
 export interface InitialData {

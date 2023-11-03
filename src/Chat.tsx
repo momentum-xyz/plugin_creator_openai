@@ -10,7 +10,13 @@ import React, { FC, useEffect, useRef, useState } from 'react';
 // } from '@mui/material';
 // import SendIcon from '@mui/icons-material/Send';
 import { Message } from './types';
-import { IconButton, Input, Loader } from '@momentum-xyz/ui-kit';
+import {
+  Button,
+  IconButton,
+  Heading,
+  Input,
+  Loader,
+} from '@momentum-xyz/ui-kit';
 import * as styled from './Chat.styled';
 
 interface ChatHistoryProps {
@@ -51,6 +57,34 @@ export const ChatHistory: FC<ChatHistoryProps> = ({ messages }) => {
   return (
     <styled.MessagesHistory>
       {messages.map((msg, index) => {
+        if (msg.role === 'model_preview') {
+          const { downloadUrl, thumbnailUrl } = JSON.parse(msg.content);
+
+          return (
+            <div
+              key={index}
+              style={{
+                background: 'transparent',
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+              }}
+            >
+              <Heading variant="h3">Generated model (thumbnail)</Heading>
+              <br />
+              <img style={{ width: '100%' }} src={thumbnailUrl} />
+              <br />
+              <Button
+                label="Upload asset"
+                onClick={() => {
+                  console.log('TODO downloadUrl', downloadUrl);
+                  alert('Not implemented yet');
+                }}
+              />
+            </div>
+          );
+        }
         const isUser = msg.role === 'user';
         const text = contentToText(msg.content);
 
