@@ -1,2 +1,3 @@
 node_modules
-plugin_creator_openai-*
+build
+plugin_odyssey_creator_openai-*
