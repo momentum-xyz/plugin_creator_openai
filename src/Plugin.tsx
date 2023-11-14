@@ -163,6 +163,7 @@ const usePlugin: UsePluginHookType = (props) => {
         const { downloadUrl, thumbnailUrl } = await meshyGenerate3D(
           {
             object_prompt: message.slice(7),
+            style_prompt: 'realistic style',
             art_style: 'realistic',
           },
           meshyApiKey,
