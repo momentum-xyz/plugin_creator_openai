@@ -23,8 +23,6 @@ export const meshyGenerate3D = async (
   for (let i = 0; i < 100; i++) {
     const resp = await fetch(`https://api.meshy.ai/v1/text-to-3d/${result}`, {
       method: 'GET',
-      mode: 'no-cors',
-      credentials: 'include',
       headers: {
         Authorization: `Bearer ${apiKey}`,
       },
