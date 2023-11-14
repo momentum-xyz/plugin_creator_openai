@@ -40,41 +40,45 @@ const defaultTransform = {
 };
 
 const usePlugin: UsePluginHookType = (props) => {
-  console.log('[plugin_creator]: usePlugin', props);
+  console.log('[plugin_odyssey_creator_ai]: usePlugin', props);
   const [messages, setMessages] = useState<Message[]>([]);
 
   const worldApi = useWorld({
     onJoinedWorld: (worldInfo) => {
-      console.log('[plugin_creator]: onJoinedWorld', worldInfo);
+      console.log('[plugin_odyssey_creator_ai]: onJoinedWorld', worldInfo);
       worldId = worldInfo.id;
     },
     onLeftWorld: () => {
-      console.log('[plugin_creator]: onLeftWorld');
+      console.log('[plugin_odyssey_creator_ai]: onLeftWorld');
       worldId = '';
     },
     onMyPosition(transform) {
-      console.log('[plugin_creator]: onMyPosition', transform);
+      console.log('[plugin_odyssey_creator_ai]: onMyPosition', transform);
       myTransform = transform;
     },
     onObjectAdded: (object) => {
-      console.log('[plugin_creator]: onObjectAdded', object);
+      console.log('[plugin_odyssey_creator_ai]: onObjectAdded', object);
       if (object.id !== worldId) {
         objects[object.id] = object;
       }
     },
     onObjectRemoved: (objectId) => {
-      console.log('[plugin_creator]: onObjectRemoved', objectId);
+      console.log('[plugin_odyssey_creator_ai]: onObjectRemoved', objectId);
       delete objects[objectId];
     },
     onObjectMove(objectId, transform) {
-      console.log('[plugin_creator]: onObjectMove', objectId, transform);
+      console.log(
+        '[plugin_odyssey_creator_ai]: onObjectMove',
+        objectId,
+        transform
+      );
       objects[objectId] = {
         ...objects[objectId],
         transform,
       };
     },
     onObjectData(objectId, data) {
-      console.log('[plugin_creator]: onObjectData', objectId, data);
+      console.log('[plugin_odyssey_creator_ai]: onObjectData', objectId, data);
       objectsData[objectId] = data;
     },
   });
@@ -86,9 +90,9 @@ const usePlugin: UsePluginHookType = (props) => {
       getSupportedAssets3d('basic'),
       getSupportedAssets3d('custom'),
     ]).then((res) => {
-      console.log('[plugin_creator]: assets3d resp', res);
+      console.log('[plugin_odyssey_creator_ai]: assets3d resp', res);
       const assets3d = res.flat();
-      console.log('[plugin_creator]: assets3d', assets3d);
+      console.log('[plugin_odyssey_creator_ai]: assets3d', assets3d);
 
       supportedAssets = assets3d.map(({ id, meta: { name, category } }) => ({
         asset3dId: id,
@@ -112,13 +116,13 @@ const usePlugin: UsePluginHookType = (props) => {
     requestObjectLock, // ??
   } = useWorld({
     onJoin: (worldInfo) => {
-      console.log('[plugin_creator]: onJoin', worldInfo);
+      console.log('[plugin_odyssey_creator_ai]: onJoin', worldInfo);
     },
     onLeave : () => {
-      console.log('[plugin_creator]: onLeave');
+      console.log('[plugin_odyssey_creator_ai]: onLeave');
     },
     onObjectAdded: (object) => {
-      console.log('[plugin_creator]: onObjectAdded', object);
+      console.log('[plugin_odyssey_creator_ai]: onObjectAdded', object);
     }
   })
 */
@@ -247,14 +251,14 @@ const usePlugin: UsePluginHookType = (props) => {
 
   return {
     creatorTab: {
-      title: 'OpenAI',
+      title: 'AI',
       icon: 'ai',
       content,
       onOpen: () => {
-        console.log('[plugin_creator]: OpenAI tab opened');
+        console.log('[plugin_odyssey_creator_ai]: tab opened');
       },
       onClose: () => {
-        console.log('[plugin_creator]: OpenAI tab closed');
+        console.log('[plugin_odyssey_creator_ai]: tab closed');
       },
     },
   };
